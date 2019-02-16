@@ -1,0 +1,175 @@
+openapi: 3.0.0
+info:
+  description: ""
+  version: 1.0.0
+  title: 新嘉闻 API 接口文档
+  contact:
+    email: rosuh@qq.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+tags:
+  - name: 文章
+  - name: 图片
+paths:
+  /articles/get:
+    get:
+      tags:
+        - 文章
+      summary: 获取文章条目
+      description: 传入文章类型和分页偏移量以便获取文章数据
+      operationId: article
+      parameters:
+        - in: path
+          name: type
+          description: 想要获取的文章的类型
+          required: true
+          schema:
+            type: string
+            enum:
+              - 综合要闻：major_news
+              - 校园公告：campus_announcement
+              - 校园动态：campus_activities
+              - 媒体报道：media_reports
+        - in: path
+          name: offset
+          description: 分页偏移量
+          required: true
+          schema:
+            type: string
+            default: "0"
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
+  /articles/search:
+    get:
+      tags:
+        - 文章
+      summary: 搜索文章
+      description: 通过传入特定关键字搜索文章，返回前 20 条记录
+      operationId: search
+      parameters:
+        - in: path
+          name: word
+          description: 关键字
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: key word is empty.
+        "404":
+          description: Articles not found.
+  /images/get:
+    get:
+      tags:
+        - 图片
+      summary: 获取文章条目
+      description: 传入文章类型和分页偏移量以便获取文章数据
+      operationId: image
+      parameters:
+        - in: path
+          name: link
+          description: 文章链接
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/image"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
+servers:
+  - url: /api
+components:
+  schemas:
+    article:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        content:
+          type: string
+          example: 这是文章内容示例
+        created:
+          type: string
+          example: Fir, 11 Jan 2019 00:00:00 GMT
+        id:
+          type: integer
+          format: int64
+          example: 3450
+        img:
+          type: integer
+          format: int2
+          example: "1"
+        link:
+          type: string
+          example: http://www.jyu.edu.cn/info/1032/20232.htm
+        title:
+          type: string
+          example: 标题
+        type:
+          type: string
+          example: major_news
+        views:
+          type: integer
+          example: 100
+      xml:
+        name: article
+    image:
+      type: object
+      properties:
+        link:
+          type: string
+          example: http://www.jyu.edu.cn/__local/2/63/5E/B619E158AFE75107F5E0B717A83_9BBE65A4_19CB8.jpg
+      xml:
+        name: image

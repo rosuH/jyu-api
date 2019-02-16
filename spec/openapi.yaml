@@ -1,0 +1,260 @@
+openapi: 3.0.0
+info:
+  version: '1.0.0'
+  
+  title: 新嘉闻 API 接口文档
+
+  # termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
+  contact:
+    email: rosuh@qq.com # [Optional] Replace with your contact email
+    url: 'https://rosuh.me' # [Optional] Replace with link to your contact form
+  license:
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+  # x-logo:
+  #   url: 'https://apis.guru/openapi-template/logo.png'
+  
+  # Describe your API here, you can use GFM (https://guides.github.com/features/mastering-markdown) here
+  description: |
+   这是新嘉闻的 API 文档
+
+# externalDocs:
+#   description: Find out how to create Github repo for your OpenAPI spec.
+#   url: 'https://github.com/Rebilly/generator-openapi-repo'
+
+# A list of tags used by the specification with additional metadata.
+# The order of the tags can be used to reflect on their order by the parsing tools.
+tags:
+  - name: 文章
+    description: 文章接口
+  - name: 图片
+    description: 图片链接接口
+servers:
+  - url: 'http://evila.cc:4000/api/v1'
+
+# Holds the relative paths to the individual endpoints. The path is appended to the
+# basePath in order to construct the full URL. 
+paths:
+  '/articles/get': # path parameter in curly braces
+    # parameters list that are used with each operation for this path
+    parameters:
+      - name: pretty_print
+        in: query
+        description: Pretty print response
+        schema:
+          type: boolean
+      - in: path
+        name: offset
+        description: 分页偏移量
+        required: true
+        schema:
+          type: string
+          default: "0"  
+    get: # documentation for GET operation for this path
+      tags:
+        - 文章
+      # summary is up to 120 symbold but we recommend to be shortest as possible
+      summary: 获取文章条目
+      
+      # you can use GFM in operation description too: https://guides.github.com/features/mastering-markdown
+      description: |
+        传入文章类型和分页偏移量以便获取文章数据
+      
+      # operationId should be unique across the whole specification
+      operationId: getArticleList
+      
+      # list of parameters for the operation
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched
+          required: true
+          schema:
+            type: string
+        - name: with_email
+          in: query
+          description: Filter users without email
+          schema:
+            type: boolean
+      responses: # list of responses
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
+    # documentation for PUT operation for this path
+  '/articles/search':
+    parameters:
+        - in: path
+          name: word
+          description: 关键字
+          required: true
+          schema:
+            type: string
+    get:
+      tags:
+        - 文章
+      summary: 搜索文章
+      description: 通过传入特定关键字搜索文章，返回前 20 条记录
+      operationId: search
+      parameters:
+        - in: path
+          name: word
+          description: 关键字
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: key word is empty.
+        "404":
+          description: Articles not found.
+  '/images/get':
+    parameters:
+        - in: path
+          name: link
+          description: 文章链接
+          required: true
+          schema:
+            type: string
+    get:
+      tags:
+        - 图片
+      summary: 获取文章条目
+      description: 传入文章类型和分页偏移量以便获取文章数据
+      operationId: getImagelist
+      parameters:
+        - in: path
+          name: link
+          description: 文章链接
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/image"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
+  /echo:
+    post:
+      tags:
+        - Echo
+      summary: Echo test
+      description: Receive the exact message you've sent
+      operationId: echo
+      security:
+        - api_key: []
+        - basic_auth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                response:
+                  value: Hello world!
+            application/xml:
+              schema:
+                type: string
+            text/csv:
+              schema:
+                type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              example: Hello world!
+          application/xml:
+            schema:
+              type: string
+              example: Hello world!
+        description: Echo payload
+        required: true
+components:
+  schemas:
+    article:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        content:
+          type: string
+          example: 这是文章内容示例
+        created:
+          type: string
+          example: Fir, 11 Jan 2019 00:00:00 GMT
+        id:
+          type: integer
+          format: int64
+          example: 3450
+        img:
+          type: integer
+          format: int2
+          example: "1"
+        link:
+          type: string
+          example: http://www.jyu.edu.cn/info/1032/20232.htm
+        title:
+          type: string
+          example: 标题
+        type:
+          type: string
+          example: major_news
+        views:
+          type: integer
+          example: 100
+    image:
+      type: object
+      properties:
+        link:
+          type: string
+          example: http://www.jyu.edu.cn/__local/2/63/5E/B619E158AFE75107F5E0B717A83_9BBE65A4_19CB8.jpg
