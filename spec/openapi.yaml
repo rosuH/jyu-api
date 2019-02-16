@@ -1,61 +1,41 @@
-# This is an **example** API to demonstrate features of OpenAPI specification.
-# It doesn't cover all OpenAPI features. For more full example check out: https://github.com/APIs-guru/petstore_extended
-
 openapi: 3.0.0
 info:
-  version: '1.0.0' # Your API version
-  # It can be any string but it is better to use semantic versioning: http://semver.org/
-  # Warning: OpenAPI require version to be string, but without quotation YAML can recognize it as number.
+  version: '1.0.0'
   
-  title: Example.com # Replace with your API title
-  # Keep it simple. Don't add "API" or version at the end of the string.
+  title: 新嘉闻 API 接口文档
 
-  termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
+  # termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
   contact:
-    email: contact@example.com # [Optional] Replace with your contact email
-    url: 'http://example.com/contact' # [Optional] Replace with link to your contact form
+    email: rosuh@qq.com # [Optional] Replace with your contact email
+    url: 'https://rosuh.me' # [Optional] Replace with link to your contact form
   license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-  x-logo:
-    url: 'https://apis.guru/openapi-template/logo.png'
+    name: MIT
+    url: 'https://opensource.org/licenses/MIT'
+  # x-logo:
+  #   url: 'https://apis.guru/openapi-template/logo.png'
   
   # Describe your API here, you can use GFM (https://guides.github.com/features/mastering-markdown) here
   description: |
-    This is an **example** API to demonstrate features of OpenAPI specification
-    # Introduction
-    This specification is intended to to be a good starting point for describing your API in 
-    [OpenAPI/Swagger format](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).
-    It also demonstrates features of [generator-openapi-repo](https://github.com/Rebilly/generator-openapi-repo) tool and 
-    [ReDoc](https://github.com/Rebilly/ReDoc) documentation engine. So beyond the standard OpenAPI syntax we use a few 
-    [vendor extensions](https://github.com/Rebilly/ReDoc/blob/master/docs/redoc-vendor-extensions.md).
+   这是新嘉闻的 API 文档
 
-    # OpenAPI Specification
-    The goal of The OpenAPI Specification is to define a standard, language-agnostic interface to REST APIs which
-    allows both humans and computers to discover and understand the capabilities of the service without access to source
-    code, documentation, or through network traffic inspection. When properly defined via OpenAPI, a consumer can 
-    understand and interact with the remote service with a minimal amount of implementation logic. Similar to what
-    interfaces have done for lower-level programming, OpenAPI removes the guesswork in calling the service.
-externalDocs:
-  description: Find out how to create Github repo for your OpenAPI spec.
-  url: 'https://github.com/Rebilly/generator-openapi-repo'
+# externalDocs:
+#   description: Find out how to create Github repo for your OpenAPI spec.
+#   url: 'https://github.com/Rebilly/generator-openapi-repo'
 
 # A list of tags used by the specification with additional metadata.
 # The order of the tags can be used to reflect on their order by the parsing tools.
 tags:
-  - name: Echo
-    description: Example echo operations
-  - name: User
-    description: Operations about user
+  - name: 文章
+    description: 文章接口
+  - name: 图片
+    description: 图片链接接口
 servers:
-  - url: 'http://example.com/api/v1'
-  - url: 'https://example.com/api/v1'
+  - url: 'http://evila.cc:4000/api/v1'
 
 # Holds the relative paths to the individual endpoints. The path is appended to the
 # basePath in order to construct the full URL. 
 paths:
-  '/users/{username}': # path parameter in curly braces
-
+  '/articles/get': # path parameter in curly braces
     # parameters list that are used with each operation for this path
     parameters:
       - name: pretty_print
@@ -63,20 +43,25 @@ paths:
         description: Pretty print response
         schema:
           type: boolean
+      - in: path
+        name: offset
+        description: 分页偏移量
+        required: true
+        schema:
+          type: string
+          default: "0"  
     get: # documentation for GET operation for this path
       tags:
-        - User
-      
+        - 文章
       # summary is up to 120 symbold but we recommend to be shortest as possible
-      summary: Get user by user name
+      summary: 获取文章条目
       
       # you can use GFM in operation description too: https://guides.github.com/features/mastering-markdown
       description: |
-        Some description of the operation. 
-        You can use `markdown` here.
+        传入文章类型和分页偏移量以便获取文章数据
       
       # operationId should be unique across the whole specification
-      operationId: getUserByName
+      operationId: getArticleList
       
       # list of parameters for the operation
       parameters:
@@ -91,63 +76,112 @@ paths:
           description: Filter users without email
           schema:
             type: boolean
-      
-      # security schemas applied to this operation
-      security:
-        - main_auth:
-            - 'read:users' # for auth2 provide list of scopes here
-        - api_key: []
       responses: # list of responses
-        '200':
-          description: Success
+        "200":
+          description: 获取成功
           content:
-            application/json: # operation response mime type
-              schema: # response schema can be specified for each response
-                $ref: '#/components/schemas/User'
-              example: # response example
-                username: user1
-                email: user@example.com
-        '403':
-          description: Forbidden
-        '404':
-          description: User not found
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
     # documentation for PUT operation for this path
-    put:
-      tags:
-        - User
-      summary: Updated user
-      description: This can only be done by the logged in user.
-      operationId: updateUser
-      parameters:
-        - name: username
-          in: path
-          description: The name that needs to be updated
+  '/articles/search':
+    parameters:
+        - in: path
+          name: word
+          description: 关键字
           required: true
           schema:
             type: string
-      security:
-        - main_auth:
-            - 'write:users'
+    get:
+      tags:
+        - 文章
+      summary: 搜索文章
+      description: 通过传入特定关键字搜索文章，返回前 20 条记录
+      operationId: search
+      parameters:
+        - in: path
+          name: word
+          description: 关键字
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
-          description: OK
-        '400':
-          description: Invalid user supplied
-        '404':
-          description: User not found
-      # request body documentation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: Updated user object
-        required: true
-  /echo: # path parameter in curly braces
-    post: # documentation for POST operation for this path
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/article"
+        "401":
+          description: key word is empty.
+        "404":
+          description: Articles not found.
+  '/images/get':
+    parameters:
+        - in: path
+          name: link
+          description: 文章链接
+          required: true
+          schema:
+            type: string
+    get:
+      tags:
+        - 图片
+      summary: 获取文章条目
+      description: 传入文章类型和分页偏移量以便获取文章数据
+      operationId: getImagelist
+      parameters:
+        - in: path
+          name: link
+          description: 文章链接
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/image"
+        "401":
+          description: Bad request for index < 0
+        "404":
+          description: Articles not found.
+        "422":
+          description: Invalid article type.
+  /echo:
+    post:
       tags:
         - Echo
       summary: Echo test
@@ -159,15 +193,6 @@ paths:
       responses:
         '200':
           description: OK
-          # document headers for this response
-          headers:
-            X-Rate-Limit: # Header name
-              description: calls per hour allowed by the user
-              schema: # Header schema
-                type: integer
-                format: int32
-            X-Expires-After:
-              $ref: '#/components/headers/ExpiresAfter'
           content:
             application/json:
               schema:
@@ -193,57 +218,43 @@ paths:
               example: Hello world!
         description: Echo payload
         required: true
-        
-# An object to hold reusable parts that can be used across the spec
 components:
   schemas:
-    Email:
-      description: User email address
-      type: string
-      format: test
-      example: john.smith@example.com
-    User:
+    article:
+      type: object
+      required:
+        - name
+        - photoUrls
+      properties:
+        content:
+          type: string
+          example: 这是文章内容示例
+        created:
+          type: string
+          example: Fir, 11 Jan 2019 00:00:00 GMT
+        id:
+          type: integer
+          format: int64
+          example: 3450
+        img:
+          type: integer
+          format: int2
+          example: "1"
+        link:
+          type: string
+          example: http://www.jyu.edu.cn/info/1032/20232.htm
+        title:
+          type: string
+          example: 标题
+        type:
+          type: string
+          example: major_news
+        views:
+          type: integer
+          example: 100
+    image:
       type: object
       properties:
-        username:
-          description: User supplied username
+        link:
           type: string
-          minLength: 4
-          example: John78
-        firstName:
-          description: User first name
-          type: string
-          minLength: 1
-          example: John
-        lastName:
-          description: User last name
-          type: string
-          minLength: 1
-          example: Smith
-        email:
-          $ref: '#/components/schemas/Email'
-  headers:
-    ExpiresAfter:
-      description: date in UTC when token expires
-      schema:
-        type: string
-        format: date-time
-  # Security scheme definitions that can be used across the specification.
-  securitySchemes:
-    main_auth: # security definition name (you can name it as you want)
-      # the following options are specific to oauth2 type
-      type: oauth2 # authorization type, one of: oauth2, apiKey, http
-      flows:
-        implicit:
-          authorizationUrl: 'http://example.com/api/oauth/dialog'
-          scopes:
-            'read:users': read users info
-            'write:users': modify or remove users
-    api_key:  # security definition name (you can name it as you want)
-      type: apiKey 
-      # The following options are specific to apiKey type
-      in: header # Where API key will be passed: header or query
-      name: api_key # API key parameter name
-    basic_auth: # security definition name (you can name it as you want)
-      type: http
-      scheme: basic
+          example: http://www.jyu.edu.cn/__local/2/63/5E/B619E158AFE75107F5E0B717A83_9BBE65A4_19CB8.jpg
