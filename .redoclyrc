@@ -1,7 +1,7 @@
-specFileName: swagger.yaml
+
 apiTitle: jyu
 splitSpec: false
 codeSamples: true
 swaggerUI: true
 travis: false
-oasVersion: '2.0'
+oasVersion: 3.0.0
